@@ -7,6 +7,7 @@ import { appWindow } from '@tauri-apps/api/window'
 import json from "$lib/json"
 import { Intellisense } from "$lib/intellisense"
 import { v4 } from "uuid"
+import { SdkEditor } from "./sdk-editor"
 
 interface AppSettings {
 	runtimePath: string
@@ -30,6 +31,8 @@ interface AppSettings {
 
 	technicalMode: boolean
 	compactMode: boolean
+
+	sdkEditorEnabled: boolean
 }
 
 await forage.setItem({
@@ -52,6 +55,7 @@ await forage.setItem({
 				extractModdedFiles: false,
 				h1: false,
 				compactMode: false,
+				sdkEditorEnabled: false,
 			},
 			json.parse((await forage.getItem({ key: "appSettings" })()) || "{}")
 		)
@@ -64,6 +68,10 @@ appSettings.subscribe((value: AppSettings) => {
 	void (async () => {
 		await forage.setItem({ key: "appSettings", value: json.stringify(value) })()
 	})()
+
+	if (value.sdkEditorEnabled) {
+		SdkEditor.init()
+	}
 })
 
 export const sessionMetadata: Writable<{
